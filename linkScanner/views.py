@@ -1,6 +1,6 @@
 from django.shortcuts import render
 
-from .models import Link
+from .models import Link, Question
 from .forms import LinkForm
 from linkScanner import scanner
 
@@ -24,7 +24,9 @@ def home(request):
     return render(request,'linkScanner/index.html',{'link_list':link_list})
 
 def learn(request):
-    return render(request, 'linkScanner/learn.html')
+    questions = Question.objects.all()
+    return render(request, 'linkScanner/learn.html',{'questions': questions})
+
 
 def report(request):
     if request.method == 'POST':
