@@ -1,71 +1,91 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phish Lingo Quiz</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+{% extends 'linkScanner/base.html' %}
 
-        #quiz-container {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
-            width: 100%;
-        }
+{% block body %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
 
-        h1 {
-            color: #333;
-        }
+    #quiz-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        width: 100%;
+    }
 
-        #question {
-            font-size: 20px;
-            margin-bottom: 20px;
-        }
+    h1 {
+        color: #333;
+    }
 
-        .option {
-            display: block;
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            font-size: 16px;
-            text-align: left;
-            background-color: #4caf50;
-            color: #fff;
-            border: 1px solid #4caf50;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    #question {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
 
-        .option:hover {
-            background-color: #45a049;
-        }
+    .option {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 16px;
+        text-align: left;
+        background-color: #4caf50;
+        color: #fff;
+        border: 1px solid #4caf50;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
 
-        #result {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
+    .option:hover {
+        background-color: #45a049;
+    }
 
-        #quiz-summary {
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
+    .selected {
+        background-color: #45a049 !important;
+    }
+
+    #result {
+        font-size: 20px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    #quiz-summary {
+        margin-top: 20px;
+    }
+
+    #progress-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 4px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    #progress-bar-inner {
+        height: 100%;
+        width: 0;
+        background-color: #4caf50;
+        border-radius: 4px;
+        transition: width 0.5s;
+    }
+
+    #nav-buttons {
+        margin-top: 20px;
+    }
+</style>
 
 <div id="quiz-container">
     <h1>Phish Lingo Quiz</h1>
@@ -74,6 +94,14 @@
     <button onclick="checkAnswer()">Submit Answer</button>
     <div id="result"></div>
     <div id="quiz-summary"></div>
+    <div id="progress-bar">
+        <div id="progress-bar-inner"></div>
+    </div>
+    <div id="nav-buttons">
+        <button onclick="prevQuestion()" disabled>Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+        <button onclick="restartQuiz()">Restart Quiz</button>
+    </div>
 </div>
 
 <script>
@@ -101,6 +129,9 @@
     const optionsElement = document.getElementById("options");
     const resultElement = document.getElementById("result");
     const quizSummaryElement = document.getElementById("quiz-summary");
+    const progressBarInner = document.getElementById("progress-bar-inner");
+    const navButtons = document.getElementById("nav-buttons");
+    let selectedOption = null;
 
     function loadQuestion() {
         const currentQuestion = phishLingoQuiz[currentQuestionIndex];
@@ -113,12 +144,23 @@
             optionElement.className = "option";
             optionElement.textContent = optionText;
             optionElement.setAttribute("data-answer", i);
+            optionElement.addEventListener("click", selectOption);
             optionsElement.appendChild(optionElement);
         }
+
+        updateProgressBar();
+    }
+
+    function selectOption(event) {
+        const clickedOption = event.target;
+        if (selectedOption) {
+            selectedOption.classList.remove("selected");
+        }
+        clickedOption.classList.add("selected");
+        selectedOption = clickedOption;
     }
 
     function checkAnswer() {
-        const selectedOption = document.querySelector(".option:hover");
         if (selectedOption) {
             const userAnswer = parseInt(selectedOption.getAttribute("data-answer"));
             const currentQuestion = phishLingoQuiz[currentQuestionIndex];
@@ -141,6 +183,9 @@
                 optionsElement.innerHTML = "";
                 showQuizSummary();
             }
+
+            selectedOption = null;
+            updateNavButtons();
         }
     }
 
@@ -149,10 +194,53 @@
         quizSummaryElement.textContent = `You got ${correctAnswers} out of ${phishLingoQuiz.length} questions correct!`;
     }
 
+    function updateProgressBar() {
+        const progress = (currentQuestionIndex / phishLingoQuiz.length) * 100;
+        progressBarInner.style.width = `${progress}%`;
+    }
+
+    function updateNavButtons() {
+        document.querySelectorAll(".option").forEach((option) => {
+            option.classList.remove("selected");
+        });
+
+        if (currentQuestionIndex > 0) {
+            document.querySelector("button[onclick='prevQuestion']").removeAttribute("disabled");
+        } else {
+            document.querySelector("button[onclick='prevQuestion']").setAttribute("disabled", true);
+        }
+
+        if (currentQuestionIndex < phishLingoQuiz.length - 1) {
+            document.querySelector("button[onclick='nextQuestion']").removeAttribute("disabled");
+        } else {
+            document.querySelector("button[onclick='nextQuestion']").setAttribute("disabled", true);
+        }
+    }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+            updateNavButtons();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < phishLingoQuiz.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+            updateNavButtons();
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        loadQuestion();
+        resultElement.textContent = "";
+        quizSummaryElement.textContent = "";
+        updateNavButtons();
+    }
+
     loadQuestion();
 </script>
-
-</body>
-</html>
-
-
+{% endblock %}
