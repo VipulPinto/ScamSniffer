@@ -74,3 +74,6 @@ def module2(request):
 
 def module3(request):
     return render(request,'linkScanner/module3.html')
+
+def game1(request):
+    return render(request,'linkScanner/game1.html')
