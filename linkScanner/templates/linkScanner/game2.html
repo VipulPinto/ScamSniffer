@@ -1,103 +1,246 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Escape the Phish Maze Game</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f4f4f4;
-            text-align: center;
-        }
+{% extends 'linkScanner/base.html' %}
 
-        #game-container {
-            max-width: 600px;
-            margin: 50px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
+{% block body %}
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f4f4f4;
+        text-align: center;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
 
-        #maze {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-gap: 10px;
-            margin-bottom: 20px;
-        }
+    #quiz-container {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 800px;
+        width: 100%;
+    }
 
-        .path {
-            width: 100%;
-            padding: 20px;
-            background-color: #4caf50;
-            color: #fff;
-            border: 1px solid #4caf50;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    h1 {
+        color: #333;
+    }
 
-        .path:hover {
-            background-color: #45a049;
-        }
+    #question {
+        font-size: 20px;
+        margin-bottom: 20px;
+    }
 
-        .phish {
-            width: 100%;
-            padding: 20px;
-            background-color: #e74c3c;
-            color: #fff;
-            border: 1px solid #c0392b;
-            border-radius: 4px;
-            cursor: not-allowed;
-        }
+    .option {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        font-size: 16px;
+        text-align: left;
+        background-color: #4caf50;
+        color: #fff;
+        border: 1px solid #4caf50;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
 
-        #result {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
-        }
-    </style>
-</head>
-<body>
+    .option:hover {
+        background-color: #45a049;
+    }
 
-<div id="game-container">
-    <h1>Escape the Phish Maze Game</h1>
-    <div id="maze">
-        <div class="path" onclick="navigate('path1')">Go Left</div>
-        <div class="path" onclick="navigate('path2')">Go Straight</div>
-        <div class="path" onclick="navigate('path3')">Go Right</div>
-        <div class="phish" onclick="caughtByPhish()">Phishing Attempt! Avoid</div>
-        <div class="path" onclick="navigate('path5')">Go Straight</div>
-        <div class="phish" onclick="caughtByPhish()">Phishing Attempt! Avoid</div>
-        <div class="path" onclick="navigate('path7')">Go Left</div>
-        <div class="path" onclick="navigate('path8')">Go Straight</div>
-        <div class="path" onclick="navigate('path9')">Go Right</div>
-    </div>
+    .selected {
+        background-color: #45a049 !important;
+    }
+
+    #result {
+        font-size: 20px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    #quiz-summary {
+        margin-top: 20px;
+    }
+
+    #progress-bar {
+        width: 100%;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 4px;
+        margin-top: 20px;
+        overflow: hidden;
+    }
+
+    #progress-bar-inner {
+        height: 100%;
+        width: 0;
+        background-color: #4caf50;
+        border-radius: 4px;
+        transition: width 0.5s;
+    }
+
+    #nav-buttons {
+        margin-top: 20px;
+    }
+</style>
+
+<div id="quiz-container">
+    <h1>Phish Lingo Quiz</h1>
+    <div id="question"></div>
+    <div id="options"></div>
+    <button onclick="checkAnswer()">Submit Answer</button>
     <div id="result"></div>
+    <div id="quiz-summary"></div>
+    <div id="progress-bar">
+        <div id="progress-bar-inner"></div>
+    </div>
+    <div id="nav-buttons">
+        <button onclick="prevQuestion()" disabled>Previous</button>
+        <button onclick="nextQuestion()">Next</button>
+        <button onclick="restartQuiz()">Restart Quiz</button>
+    </div>
 </div>
 
 <script>
-    let currentPath = "path1";
+    const phishLingoQuiz = [
+        {
+            question: "What does 'Phishing' refer to?",
+            options: ["Fishing in the ocean", "A cyber attack to steal sensitive information", "A popular online game", "A type of bird"],
+            correctAnswer: 1
+        },
+        {
+            question: "Which type of phishing targets specific individuals or organizations?",
+            options: ["Regular phishing", "Spear phishing", "Clone phishing", "Vishing"],
+            correctAnswer: 1
+        },
+        {
+            question: "What is the term for a deceptive email or message that appears to be from a trusted source?",
+            options: ["Hoax", "Spam", "Phish", "Spoof"],
+            correctAnswer: 2
+        },
+        // Add more questions and options as needed
+    ];
+
+    let currentQuestionIndex = 0;
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
     const resultElement = document.getElementById("result");
+    const quizSummaryElement = document.getElementById("quiz-summary");
+    const progressBarInner = document.getElementById("progress-bar-inner");
+    const navButtons = document.getElementById("nav-buttons");
+    let selectedOption = null;
 
-    function navigate(newPath) {
-        if (!resultElement.textContent) {
-            currentPath = newPath;
-            checkResult();
+    function loadQuestion() {
+        const currentQuestion = phishLingoQuiz[currentQuestionIndex];
+        questionElement.textContent = currentQuestion.question;
+
+        optionsElement.innerHTML = "";
+        for (let i = 0; i < currentQuestion.options.length; i++) {
+            const optionText = currentQuestion.options[i];
+            const optionElement = document.createElement("div");
+            optionElement.className = "option";
+            optionElement.textContent = optionText;
+            optionElement.setAttribute("data-answer", i);
+            optionElement.addEventListener("click", selectOption);
+            optionsElement.appendChild(optionElement);
+        }
+
+        updateProgressBar();
+    }
+
+    function selectOption(event) {
+        const clickedOption = event.target;
+        if (selectedOption) {
+            selectedOption.classList.remove("selected");
+        }
+        clickedOption.classList.add("selected");
+        selectedOption = clickedOption;
+    }
+
+    function checkAnswer() {
+        if (selectedOption) {
+            const userAnswer = parseInt(selectedOption.getAttribute("data-answer"));
+            const currentQuestion = phishLingoQuiz[currentQuestionIndex];
+
+            if (userAnswer === currentQuestion.correctAnswer) {
+                resultElement.textContent = "Correct! 🎉";
+            } else {
+                resultElement.textContent = "Wrong! 😟";
+            }
+
+            currentQuestionIndex++;
+
+            if (currentQuestionIndex < phishLingoQuiz.length) {
+                setTimeout(() => {
+                    resultElement.textContent = "";
+                    loadQuestion();
+                }, 1500);
+            } else {
+                resultElement.textContent = "Quiz complete! You've finished the Phish Lingo Quiz.";
+                optionsElement.innerHTML = "";
+                showQuizSummary();
+            }
+
+            selectedOption = null;
+            updateNavButtons();
         }
     }
 
-    function caughtByPhish() {
-        resultElement.textContent = "Caught by a phishing attempt! Game Over.";
+    function showQuizSummary() {
+        const correctAnswers = phishLingoQuiz.filter((question, index) => question.correctAnswer === index).length;
+        quizSummaryElement.textContent = `You got ${correctAnswers} out of ${phishLingoQuiz.length} questions correct!`;
     }
 
-    function checkResult() {
-        if (currentPath === "path9") {
-            resultElement.textContent = "Congratulations! You've successfully escaped the phish maze.";
+    function updateProgressBar() {
+        const progress = (currentQuestionIndex / phishLingoQuiz.length) * 100;
+        progressBarInner.style.width = `${progress}%`;
+    }
+
+    function updateNavButtons() {
+        document.querySelectorAll(".option").forEach((option) => {
+            option.classList.remove("selected");
+        });
+
+        if (currentQuestionIndex > 0) {
+            document.querySelector("button[onclick='prevQuestion']").removeAttribute("disabled");
+        } else {
+            document.querySelector("button[onclick='prevQuestion']").setAttribute("disabled", true);
+        }
+
+        if (currentQuestionIndex < phishLingoQuiz.length - 1) {
+            document.querySelector("button[onclick='nextQuestion']").removeAttribute("disabled");
+        } else {
+            document.querySelector("button[onclick='nextQuestion']").setAttribute("disabled", true);
         }
     }
+
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            loadQuestion();
+            updateNavButtons();
+        }
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < phishLingoQuiz.length - 1) {
+            currentQuestionIndex++;
+            loadQuestion();
+            updateNavButtons();
+        }
+    }
+
+    function restartQuiz() {
+        currentQuestionIndex = 0;
+        loadQuestion();
+        resultElement.textContent = "";
+        quizSummaryElement.textContent = "";
+        updateNavButtons();
+    }
+
+    loadQuestion();
 </script>
-
-</body>
-</html>
+{% endblock %}
