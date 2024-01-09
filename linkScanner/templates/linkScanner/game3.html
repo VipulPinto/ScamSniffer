@@ -1,246 +1,111 @@
-{% extends 'linkScanner/base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot the Fake URL Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
 
-{% block body %}
-<style>
-    body {
-        font-family: 'Arial', sans-serif;
-        background-color: #f4f4f4;
-        text-align: center;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-    }
+        #game-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-    #quiz-container {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        max-width: 800px;
-        width: 100%;
-    }
+        #url-display {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
 
-    h1 {
-        color: #333;
-    }
+        .option {
+            display: inline-block;
+            width: 150px;
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            text-align: center;
+            background-color: #4caf50;
+            color: #fff;
+            border: 1px solid #4caf50;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
 
-    #question {
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
+        .option:hover {
+            background-color: #45a049;
+        }
 
-    .option {
-        display: block;
-        width: 100%;
-        padding: 10px;
-        margin-bottom: 10px;
-        font-size: 16px;
-        text-align: left;
-        background-color: #4caf50;
-        color: #fff;
-        border: 1px solid #4caf50;
-        border-radius: 4px;
-        cursor: pointer;
-        transition: background-color 0.3s;
-    }
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
 
-    .option:hover {
-        background-color: #45a049;
-    }
-
-    .selected {
-        background-color: #45a049 !important;
-    }
-
-    #result {
-        font-size: 20px;
-        font-weight: bold;
-        margin-top: 20px;
-    }
-
-    #quiz-summary {
-        margin-top: 20px;
-    }
-
-    #progress-bar {
-        width: 100%;
-        height: 20px;
-        background-color: #ddd;
-        border-radius: 4px;
-        margin-top: 20px;
-        overflow: hidden;
-    }
-
-    #progress-bar-inner {
-        height: 100%;
-        width: 0;
-        background-color: #4caf50;
-        border-radius: 4px;
-        transition: width 0.5s;
-    }
-
-    #nav-buttons {
-        margin-top: 20px;
-    }
-</style>
-
-<div id="quiz-container">
-    <h1>Phish Lingo Quiz</h1>
-    <div id="question"></div>
-    <div id="options"></div>
-    <button onclick="checkAnswer()">Submit Answer</button>
+<div id="game-container">
+    <h1>Spot the Fake URL Game</h1>
+    <div id="url-display"></div>
+    <div id="options">
+        <div class="option" onclick="checkAnswer(true)">Real URL</div>
+        <div class="option" onclick="checkAnswer(false)">Fake URL</div>
+    </div>
     <div id="result"></div>
-    <div id="quiz-summary"></div>
-    <div id="progress-bar">
-        <div id="progress-bar-inner"></div>
-    </div>
-    <div id="nav-buttons">
-        <button onclick="prevQuestion()" disabled>Previous</button>
-        <button onclick="nextQuestion()">Next</button>
-        <button onclick="restartQuiz()">Restart Quiz</button>
-    </div>
 </div>
 
 <script>
-    const phishLingoQuiz = [
-        {
-            question: "What does 'Phishing' refer to?",
-            options: ["Fishing in the ocean", "A cyber attack to steal sensitive information", "A popular online game", "A type of bird"],
-            correctAnswer: 1
-        },
-        {
-            question: "Which type of phishing targets specific individuals or organizations?",
-            options: ["Regular phishing", "Spear phishing", "Clone phishing", "Vishing"],
-            correctAnswer: 1
-        },
-        {
-            question: "What is the term for a deceptive email or message that appears to be from a trusted source?",
-            options: ["Hoax", "Spam", "Phish", "Spoof"],
-            correctAnswer: 2
-        },
-        // Add more questions and options as needed
+    const urlGame = [
+        { url: "https://www.google.com", isReal: true },
+        { url: "http://phishingexample.com", isReal: false },
+        { url: "https://www.amazon.com", isReal: true },
+        { url: "http://securebank-login.com", isReal: false },
+        // Add more URLs as needed
     ];
 
-    let currentQuestionIndex = 0;
-    const questionElement = document.getElementById("question");
-    const optionsElement = document.getElementById("options");
+    let currentUrlIndex = 0;
+    const urlDisplayElement = document.getElementById("url-display");
     const resultElement = document.getElementById("result");
-    const quizSummaryElement = document.getElementById("quiz-summary");
-    const progressBarInner = document.getElementById("progress-bar-inner");
-    const navButtons = document.getElementById("nav-buttons");
-    let selectedOption = null;
 
-    function loadQuestion() {
-        const currentQuestion = phishLingoQuiz[currentQuestionIndex];
-        questionElement.textContent = currentQuestion.question;
-
-        optionsElement.innerHTML = "";
-        for (let i = 0; i < currentQuestion.options.length; i++) {
-            const optionText = currentQuestion.options[i];
-            const optionElement = document.createElement("div");
-            optionElement.className = "option";
-            optionElement.textContent = optionText;
-            optionElement.setAttribute("data-answer", i);
-            optionElement.addEventListener("click", selectOption);
-            optionsElement.appendChild(optionElement);
-        }
-
-        updateProgressBar();
+    function loadUrl() {
+        const currentUrl = urlGame[currentUrlIndex];
+        urlDisplayElement.textContent = currentUrl.url;
     }
 
-    function selectOption(event) {
-        const clickedOption = event.target;
-        if (selectedOption) {
-            selectedOption.classList.remove("selected");
-        }
-        clickedOption.classList.add("selected");
-        selectedOption = clickedOption;
-    }
+    function checkAnswer(userAnswer) {
+        const currentUrl = urlGame[currentUrlIndex];
 
-    function checkAnswer() {
-        if (selectedOption) {
-            const userAnswer = parseInt(selectedOption.getAttribute("data-answer"));
-            const currentQuestion = phishLingoQuiz[currentQuestionIndex];
-
-            if (userAnswer === currentQuestion.correctAnswer) {
-                resultElement.textContent = "Correct! 🎉";
-            } else {
-                resultElement.textContent = "Wrong! 😟";
-            }
-
-            currentQuestionIndex++;
-
-            if (currentQuestionIndex < phishLingoQuiz.length) {
-                setTimeout(() => {
-                    resultElement.textContent = "";
-                    loadQuestion();
-                }, 1500);
-            } else {
-                resultElement.textContent = "Quiz complete! You've finished the Phish Lingo Quiz.";
-                optionsElement.innerHTML = "";
-                showQuizSummary();
-            }
-
-            selectedOption = null;
-            updateNavButtons();
-        }
-    }
-
-    function showQuizSummary() {
-        const correctAnswers = phishLingoQuiz.filter((question, index) => question.correctAnswer === index).length;
-        quizSummaryElement.textContent = `You got ${correctAnswers} out of ${phishLingoQuiz.length} questions correct!`;
-    }
-
-    function updateProgressBar() {
-        const progress = (currentQuestionIndex / phishLingoQuiz.length) * 100;
-        progressBarInner.style.width = `${progress}%`;
-    }
-
-    function updateNavButtons() {
-        document.querySelectorAll(".option").forEach((option) => {
-            option.classList.remove("selected");
-        });
-
-        if (currentQuestionIndex > 0) {
-            document.querySelector("button[onclick='prevQuestion']").removeAttribute("disabled");
+        if (userAnswer === currentUrl.isReal) {
+            resultElement.textContent = "Correct! 👍";
         } else {
-            document.querySelector("button[onclick='prevQuestion']").setAttribute("disabled", true);
+            resultElement.textContent = "Wrong! 👎";
         }
 
-        if (currentQuestionIndex < phishLingoQuiz.length - 1) {
-            document.querySelector("button[onclick='nextQuestion']").removeAttribute("disabled");
+        currentUrlIndex++;
+
+        if (currentUrlIndex < urlGame.length) {
+            setTimeout(() => {
+                resultElement.textContent = "";
+                loadUrl();
+            }, 1000);
         } else {
-            document.querySelector("button[onclick='nextQuestion']").setAttribute("disabled", true);
+            resultElement.textContent = "Game Over! You've completed the challenge.";
+            urlDisplayElement.textContent = "";
+            document.getElementById("options").innerHTML = "";
         }
     }
 
-    function prevQuestion() {
-        if (currentQuestionIndex > 0) {
-            currentQuestionIndex--;
-            loadQuestion();
-            updateNavButtons();
-        }
-    }
-
-    function nextQuestion() {
-        if (currentQuestionIndex < phishLingoQuiz.length - 1) {
-            currentQuestionIndex++;
-            loadQuestion();
-            updateNavButtons();
-        }
-    }
-
-    function restartQuiz() {
-        currentQuestionIndex = 0;
-        loadQuestion();
-        resultElement.textContent = "";
-        quizSummaryElement.textContent = "";
-        updateNavButtons();
-    }
-
-    loadQuestion();
+    loadUrl();
 </script>
-{% endblock %}
+
+</body>
+</html>
