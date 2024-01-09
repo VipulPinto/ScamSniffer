@@ -24,8 +24,7 @@ def home(request):
     return render(request,'linkScanner/index.html',{'link_list':link_list})
 
 def learn(request):
-    questions = Question.objects.all()
-    return render(request, 'linkScanner/learn.html',{'questions': questions})
+    return render(request, 'linkScanner/learn.html')
 
 
 def report(request):
