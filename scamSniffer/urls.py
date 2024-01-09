@@ -30,4 +30,7 @@ urlpatterns = [
     path('contact/', views.contact),
     path('about/', views.about),
     path('result/', views.result),
+    path('module1/',views.module1),
+    path('module2/',views.module2),
+    path('module3/',views.module3)
 ]

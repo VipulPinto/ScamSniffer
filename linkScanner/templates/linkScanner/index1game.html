@@ -1,111 +1,110 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'linkscanner/base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles.css">
-    <title>Phishing Attack Learn Page</title>
-</head>
+{% block body %}
 
-<body>
-<div id ="header">
-        <h1>Phishing Attack Awareness</h1>
-   </div>
 <div id="content">
-    <section id="introduction">
-        <h2>Introduction to Phishing Attacks</h2>
-        <p>Learn about the common tactics used by cybercriminals to trick individuals into revealing sensitive information.</p>
-    </section>
+<section id="introduction">
+    <h2>Introduction to Phishing Attacks</h2><br>
+    <p>Learn about the common tactics used by cybercriminals to trick individuals into revealing sensitive information.</p><br>
+</section>
 
-    <section id="phishing-games">
-        <h2>Phishing Games</h2>
-        <p>Test your knowledge with interactive games and quizzes!</p>
+<section id="phishing-games">
+    <h2>Interactive Learning</h2><br>
+    <p>Test your knowledge with interactive games and quizzes!</p><br>
 </div>
-        
-        <!-- Include links to different game pages -->
-        <a href="game1.html">Game 1: Phish or Not?</a><br>
-        <a href="game2.html">Game 2: Escape the Phish Maze</a><br>
-        <a href="game3.html">Game 3:Phish Lingo Quiz </a><br>
-        <a href ="game4.html">Game 4 :Phish detective Mystery game </a><br>
-        <a href = "game5.html">Game 5 : Spotting Fake URL's</a><br>
+    
+<div style="padding-left: 30px;">
+    <!-- Include links to different game pages -->
+    <a href="game1.html"> Game 1: Phish or Not?</a><br><br>
+    <a href="game2.html"> Game 2: Escape the Phish Maze</a><br><br>
+    <a href="game3.html"> Game 3: Phish Lingo Quiz </a><br><br>
+    <a href="game4.html"> Game 4: Phish detective Mystery game </a><br><br>
+    <a href="game5.html"> Game 5: Spotting Fake URL's</a><br><br>
+</div>
 
-        <!-- Add more game links as needed -->
-    </section>
+    <!-- Add more game links as needed -->
+</section>
 
-    <section id="phishing-prevention">
-        <h2>Phishing Prevention Tips</h2>
-        <ul>
-            <li>Be cautious of unexpected emails.</li>
-            <li>Check URLs before clicking on links.</li>
-            <li>Use multi-factor authentication.</li>
-            <li>Regularly update passwords.</li>
-        </ul>
-    </section>
+<section id="phishing-prevention">
+    <div style="padding-left: 30px;">
+    <h2>Phishing Prevention Tips</h2>
+    <ul>
+        <li>Be cautious of unexpected emails.</li><br>
+        <li>Check URLs before clicking on links.</li><br>
+        <li>Use multi-factor authentication.</li><br>
+        <li>Regularly update passwords.</li><br>
+    </ul>
+</div>
+</section>
 
-    <footer>
-        <p>&copy; 2023 Phishing Learn Page</p>
-    </footer>
+<footer>
+    <br><p>&copy; 2023 Phishing Learn Page</p>
+</footer>
 
 
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Index Page</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #ADD8E6 ;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Animated Index Page</title>
+<style>
+    body {
+        background-image: url('/static/linkScanner/c1.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat; 
+        height: 100vh;
+        margin:0;
+    }
+    
+    .content {
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+    background-color: #3bb2c03d;
+    line-height: 2;
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+    width: 60%;
+    max-width: 600px;
+    margin-right: 30%;
+    margin-left: 30%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+    transition: box-shadow 0.3s ease;
+}
 
-        #header {
-            background-color: #0000FF;
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
+    #content {
+        opacity: 0; /* Set initial opacity to 0 */
+        animation: fadeIn 1.5s ease-in-out forwards; /* Animation for fade-in */
+        margin: 20px;
+    }
 
-        #content {
-            opacity: 0; /* Set initial opacity to 0 */
-            animation: fadeIn 1.5s ease-in-out forwards; /* Animation for fade-in */
-            margin: 20px;
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
         }
+        to {
+            opacity: 1;
+        }
+    }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-            to {
-                opacity: 1;
-            }
-        }
+    h1 {
+        color: #00008B;
+    }
 
-        h1 {
-            color: #00008B;
-        }
+    p {
+        color: #ff0000;
+    }
+   h2 {
+        color: #00008B;
+    }
 
-        p {
-            color: #ff0000;
-        }
-       h2 {
-            color: #00008B;
-        }
-
-        p {
-            color: #ff0000;
-        }
-    </style>
+    p {
+        color: #ff0000;
+    }
+</style>
 </head>
-<body>
-
-
-</body>
-
-
-
-
-</html>
+    
+{% endblock body %}
