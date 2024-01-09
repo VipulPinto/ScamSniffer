@@ -66,3 +66,12 @@ def about(request):
 
 def result(request):
     return render(request,'linkScanner/result.html')
+
+def module1(request):
+    return render(request,'linkScanner/module1.html')
+
+def module2(request):
+    return render(request,'linkScanner/module2.html')
+
+def module3(request):
+    return render(request,'linkScanner/module3.html')
