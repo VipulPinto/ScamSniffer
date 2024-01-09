@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spot the Fake URL Game</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        #game-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #url-display {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .option {
+            display: inline-block;
+            width: 150px;
+            padding: 10px;
+            margin: 10px;
+            font-size: 16px;
+            text-align: center;
+            background-color: #4caf50;
+            color: #fff;
+            border: 1px solid #4caf50;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .option:hover {
+            background-color: #45a049;
+        }
+
+        #result {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>Spot the Fake URL Game</h1>
+    <div id="url-display"></div>
+    <div id="options">
+        <div class="option" onclick="checkAnswer(true)">Real URL</div>
+        <div class="option" onclick="checkAnswer(false)">Fake URL</div>
+    </div>
+    <div id="result"></div>
+</div>
+
+<script>
+    const urlGame = [
+        { url: "https://www.google.com", isReal: true },
+        { url: "http://phishingexample.com", isReal: false },
+        { url: "https://www.amazon.com", isReal: true },
+        { url: "http://securebank-login.com", isReal: false },
+        // Add more URLs as needed
+    ];
+
+    let currentUrlIndex = 0;
+    const urlDisplayElement = document.getElementById("url-display");
+    const resultElement = document.getElementById("result");
+
+    function loadUrl() {
+        const currentUrl = urlGame[currentUrlIndex];
+        urlDisplayElement.textContent = currentUrl.url;
+    }
+
+    function checkAnswer(userAnswer) {
+        const currentUrl = urlGame[currentUrlIndex];
+
+        if (userAnswer === currentUrl.isReal) {
+            resultElement.textContent = "Correct! 👍";
+        } else {
+            resultElement.textContent = "Wrong! 👎";
+        }
+
+        currentUrlIndex++;
+
+        if (currentUrlIndex < urlGame.length) {
+            setTimeout(() => {
+                resultElement.textContent = "";
+                loadUrl();
+            }, 1000);
+        } else {
+            resultElement.textContent = "Game Over! You've completed the challenge.";
+            urlDisplayElement.textContent = "";
+            document.getElementById("options").innerHTML = "";
+        }
+    }
+
+    loadUrl();
+</script>
+
+</body>
+</html>
