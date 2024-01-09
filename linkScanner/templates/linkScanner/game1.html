@@ -1,9 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phish or Not Game</title>
+{% extends 'linkScanner/base.html' %} {% block body %}
+
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -49,10 +45,19 @@
             font-weight: bold;
             margin-top: 20px;
         }
+        #next{
+            background-color: rgb(5 181 181);
+            border-radius: 5px;
+            font-size: large;
+            padding: 10px;
+            margin-left: 50px;
+            margin-top: 20px;
+            color: #051b56;
+          }
     </style>
-</head>
-<body>
 
+<body>
+    
 <div id="game-container">
     <h1>Phish or Not Game</h1>
     <div id="scenario"></div>
@@ -60,6 +65,7 @@
         <div class="option" onclick="checkAnswer(true)">Phish</div>
         <div class="option" onclick="checkAnswer(false)">Not Phish</div>
     </div>
+    <button onClick=next() id="next"><b>Next</b></button>
     <div id="result"></div>
 </div>
 
@@ -75,10 +81,24 @@
     let currentScenarioIndex = 0;
     const scenarioElement = document.getElementById("scenario");
     const resultElement = document.getElementById("result");
+    let resultDisplay = 0;
+
 
     function loadScenario() {
         const currentScenario = phishOrNotGame[currentScenarioIndex];
         scenarioElement.textContent = currentScenario.scenario;
+    }
+
+    function next(){
+        resultElement.textContent = "";
+        currentScenarioIndex++;
+        loadScenario();
+        if (currentScenarioIndex >= phishOrNotGame.length){
+            resultElement.textContent = "Game Over! You've completed the challenge. Your Score is " + resultDisplay+ "/4";
+            scenarioElement.textContent = "";
+            document.getElementById("options").innerHTML = "";
+        }
+
     }
 
     function checkAnswer(userAnswer) {
@@ -86,27 +106,19 @@
 
         if (userAnswer === currentScenario.isPhish) {
             resultElement.textContent = "Correct! 👍";
+            resultDisplay +=1;
         } else {
             resultElement.textContent = "Wrong! 👎";
         }
 
-        currentScenarioIndex++;
+        
 
-        if (currentScenarioIndex < phishOrNotGame.length) {
-            setTimeout(() => {
-                resultElement.textContent = "";
-                loadScenario();
-            }, 1000);
-        } else {
-            resultElement.textContent = "Game Over! You've completed the challenge.";
-            scenarioElement.textContent = "";
-            document.getElementById("options").innerHTML = "";
-        }
+        
     }
 
     loadScenario();
 </script>
 
 </body>
-</html>
 
+{% endblock body %}

@@ -32,5 +32,6 @@ urlpatterns = [
     path('result/', views.result),
     path('module1/',views.module1),
     path('module2/',views.module2),
-    path('module3/',views.module3)
+    path('module3/',views.module3),
+    path('game1/',views.game1)
 ]
