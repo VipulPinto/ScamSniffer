@@ -500,18 +500,28 @@ class FeatureExtraction:
     def getFeaturesList(self):
         return self.features
 
-# df = pd.read_csv('phishing.csv')
-# df.rename(columns = {'class':'label'}, inplace = True)
-# df.head()
-# df = df.drop(["Index"],axis =1) 
-# X = df.drop('label',axis='columns')
-# y = df.label
+def train_model(url):
+    obj = FeatureExtraction(url)
+    x = np.array(obj.getFeaturesList()).reshape(1,30)
+    df = pd.read_csv('phishing.csv')
+    row = len(df.index)
+    x = np.insert(x,0,row)
+    x = np.insert(x,31,-1)
+    df.loc[len(df.index)] = x
+    df.to_csv('phishing.csv',index=False)
+    df = pd.read_csv('phishing.csv')
+    df.rename(columns = {'class':'label'}, inplace = True)
+    df.head()
+    df = df.drop(["Index"],axis =1) 
+    X = df.drop('label',axis='columns')
+    y = df.label
 
-# X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2)
-# model = RandomForestClassifier(n_estimators=20)
-# model.fit(X_train, y_train)
-# print(model.score(X_test, y_test))
-# pickle.dump(model,open('phishing_forestclassifier.pkl','wb'))
+    X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2)
+    model = RandomForestClassifier(n_estimators=20)
+    model.fit(X_train, y_train)
+    print(model.score(X_test, y_test))
+    pickle.dump(model,open('phishing_forestclassifier.pkl','wb'))
+    
 def check(url):
     loaded_model = pickle.load(open('phishing_forestclassifier.pkl', 'rb'))
     obj = FeatureExtraction(url)

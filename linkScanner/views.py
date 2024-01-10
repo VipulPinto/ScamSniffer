@@ -39,6 +39,7 @@ def report(request):
             print(existing_link.status)
             if existing_link.status == "Good": 
                 #retraining
+                scanner.train_model(existing_link.link)                                     
                 return render(request, 'linkScanner/result.html',{'result': "Thank you!"})
             else:  #if existin_link is bad
                 return render(request, 'linkScanner/result.html',{'result': "Thank you!"})     
@@ -52,6 +53,7 @@ def report(request):
             link.save()
             if result == "Good":
                 #retrain
+                scanner.train_model(link.link)
                 return render(request, 'linkScanner/result.html',{'result': "Thank you!"})
             else: 
                 return render(request, 'linkScanner/result.html',{'result': "Thank you!"})
